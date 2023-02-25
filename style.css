@@ -1,0 +1,149 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-size: 16px;
+}
+
+.saper {
+  width: fit-content;
+  padding: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  border: 0.25rem outset #dbdbdb;
+  background-color: #b6b6b6;
+}
+/*fields /////////////////////////*/
+.board {
+  border: 0.25rem inset #dbdbdb;
+  padding: 4px;
+  left: 50%;
+  font-weight: 900;
+  display: grid;
+  grid-template-columns: repeat(16, 1.61rem);
+  grid-template-rows: repeat(16, 1.61rem);
+  background-color: #7b7b7b;
+  justify-content: center;
+  gap: 0.05rem;
+}
+
+.field {
+  width: 1.6rem;
+  height: 1.6rem;
+  line-height: 1.3rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: Arial;
+  text-decoration: none;
+  box-sizing: border-box;
+  text-align: center;
+}
+.clicked {
+  border: 0.18rem inset #dbdbdb;
+  background-color: #dbdbdb;
+  border-radius: 0.1rem;
+}
+.not-clicked {
+  background-color: #b5b5b5;
+  border-radius: 0.1rem;
+  border: 0.18rem outset #dbdbdb;
+}
+.not-clicked.hover:hover {
+  border: 0.18rem inset #dbdbdb;
+  background-color: #dbdbdb;
+  border-radius: 0.1rem;
+}
+.flag {
+  background-image: URL("icons/red-flag.png");
+  background-size: 1.3rem;
+}
+.bomb-field {
+  background: URL("icons/bomb.png");
+  background-size: 1.3rem;
+  background-color: #dbdbdb;
+}
+.bomb-detonated {
+  background: URL("/icons/bomb-d.ico");
+  background-size: 1.6rem;
+}
+
+.number {
+  font-size: 1.2rem;
+  text-shadow: 0 0 0.05rem #000;
+}
+.number-1 {
+  color: blue;
+}
+.number-2 {
+  color: green;
+}
+.number-3 {
+  color: red;
+}
+.number-4 {
+  color: purple;
+}
+.number-5 {
+  color: black;
+}
+
+/*  state /////////////////////////*/
+@font-face {
+  font-family: DIGITALDREAM;
+  src: url("font/DIGITALDREAM.ttf");
+}
+.state {
+  height: 80px;
+  padding: 5px;
+  padding-bottom: 25px;
+  display: flex;
+  font-size: 28px;
+  justify-content: space-between;
+  font-family: DIGITALDREAM;
+}
+.state-field {
+  align-self: center;
+}
+.bombs-left,
+.time {
+  width: 90px;
+  height: 45px;
+  border: 2px solid black;
+  color: rgb(236, 14, 14);
+  background-image: radial-gradient(rgb(210, 93, 93) 0.1px, transparent 1px);
+  background-size: 10px 10px;
+  background-color: #353f41;
+  text-shadow: 2px 2px 3px rgb(150, 35, 35);
+}
+.face {
+  width: 60px;
+  height: 60px;
+  line-height: 72px;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+.face.clicked {
+  border: 6px inset #dbdbdb;
+  background-color: #dbdbdb;
+  border-radius: 0.1rem;
+}
+.face.not-clicked {
+  background-color: #b5b5b5;
+  border-radius: 0.1rem;
+  border: 6px outset #dbdbdb;
+}
+
+.face img {
+  width: 40px;
+  height: 40px;
+}
+
+.bombs-left p,
+.time p {
+  text-align: center;
+  line-height: 45px;
+  letter-spacing: 10px;
+}
