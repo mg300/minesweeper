@@ -12,6 +12,6 @@ export const Config = {
   expert: {
     rows: 30,
     cols: 30,
-    mines: 90,
+    mines: 150,
   },
 };

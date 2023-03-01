@@ -34,9 +34,13 @@ export class Field extends UI {
     }
   }
 
-  showBomb() {
-    this.DOMelement.classList.remove("not-clicked");
-    this.DOMelement.classList.add("bomb-detonated");
+  showAllBombs(arr) {
+    arr.flat().forEach((arr) => {
+      if (arr.isMine) {
+        arr.DOMelement.classList.remove("not-clicked");
+        arr.DOMelement.classList.add("bomb-detonated");
+      }
+    });
   }
   showValue() {
     this.DOMelement.classList.add(`number-${this.value}`);

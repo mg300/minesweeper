@@ -5,7 +5,14 @@ import { Stats } from "./Stats.js";
 class Game extends UI {
   constructor(config) {
     super();
+    this.startNewGame(config);
+    this.initGame();
+  }
+  startNewGame(config) {
+    this.config = config;
     this.cols = config.cols;
+    this.board = this.getBoard();
+    this.board.innerHTML = "";
     this.rows = config.rows;
     this.bombs = config.mines;
     this.NumberOfCells = config.cols * config.rows;
@@ -14,8 +21,10 @@ class Game extends UI {
     this.isGameLost = false;
     this.FieldsLeft = config.cols * config.rows - config.mines;
     this.cellsArr = [];
-    this.board = this.getBoard();
     this.stats = new Stats();
+    this.GenerateBoard();
+    this.PlaceMines(this.bombs);
+    this.assignValueToFields();
   }
   setGrid() {
     this.board.style.gridTemplateColumns = `repeat(${this.cols},1.61rem)`;
@@ -39,8 +48,9 @@ class Game extends UI {
 
     while (mines) {
       const cel = Math.floor(Math.random() * this.NumberOfCells);
+      if (!flatArr[cel].isMine) mines--;
+      console.log("xdd");
       flatArr[cel].isMine = true;
-      mines--;
     }
   }
   CalcValueForSingleField(x, y) {
@@ -88,7 +98,7 @@ class Game extends UI {
     }
   }
 
-  addEventClick() {
+  addEventClickField() {
     let moving = false;
     let prevEl = null;
     this.board.addEventListener("mousedown", (e) => {
@@ -109,7 +119,7 @@ class Game extends UI {
           this.stats.toggleAstFace();
           moving = false;
           if (typeof e.target.dataset.x == "undefined") return;
-          const field = this.cellsArr[e.target.dataset.x][e.target.dataset.y];
+          const field = this.cellsArr[x.target.dataset.x][x.target.dataset.y];
           this.handleClick(field);
         },
         { once: true }
@@ -122,15 +132,20 @@ class Game extends UI {
       this.showFieldsWithBomb();
     } else {
       this.isGameLost = true;
-      console.log("end");
       this.stats.toggleSmileFace();
       this.stats.toggleSadFace();
     }
   }
+  addEventFace() {
+    this.stats.face.addEventListener(
+      "click",
+      this.startNewGame.bind(this, this.config)
+    );
+  }
 
   handleClick(field) {
     if (field.isMine) {
-      field.showBomb();
+      field.showAllBombs(this.cellsArr);
       this.endGame();
       return;
     }
@@ -145,11 +160,8 @@ class Game extends UI {
   }
 
   initGame() {
-    this.GenerateBoard();
-    this.PlaceMines(this.bombs);
-    this.assignValueToFields();
-    this.addEventClick();
+    this.addEventClickField();
+    this.addEventFace();
   }
 }
-const saper = new Game(Config.easy);
-saper.initGame();
+const saper = new Game(Config.expert);

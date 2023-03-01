@@ -5,6 +5,7 @@ export class Stats extends UI {
     this.face = this.getFace();
     this.bombs = this.getBombsLeft();
     this.timer = this.getTimer();
+    this.resetFace();
   }
   startTimer() {}
   stopTimer() {}
@@ -16,6 +17,9 @@ export class Stats extends UI {
   }
   toggleAstFace() {
     this.face.classList.toggle("ast");
+  }
+  resetFace() {
+    this.face.className = "state-field field face not-clicked smile";
   }
   setBombsLeft(quantity) {
     this.bombs.innerHTML = this.quantity;
