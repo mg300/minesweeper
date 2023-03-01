@@ -1,40 +1,44 @@
 import { UI } from "./UI.js";
 import { Field } from "./field.js";
 import { Config } from "./config.js";
+import { Stats } from "./Stats.js";
 class Game extends UI {
-  #cellsArr = [];
-  #NumberOfCells = 0;
-  #cols = 0;
-  #rows = 0;
-
-  GenerateBoard(config) {
-    const cols = config.cols;
-    const rows = config.rows;
-    this.#cols = cols;
-    this.#rows = rows;
-    this.#NumberOfCells = cols * rows;
-    const board = this.getBoard();
-    for (let i = 0; i < cols; i++) {
-      this.#cellsArr[i] = [];
-      for (let j = 0; j < rows; j++) {
-        this.#cellsArr[i].push(new Field(i, j));
-        const div = this.#cellsArr[i][j].createField();
-        board.insertAdjacentHTML("beforeend", div);
-
-        this.#cellsArr[i][j].DOMelement = this.getCell(
-          this.#cellsArr[i][j].selector
-        );
+  constructor(config) {
+    super();
+    this.cols = config.cols;
+    this.rows = config.rows;
+    this.bombs = config.mines;
+    this.NumberOfCells = config.cols * config.rows;
+    this.cellsLeft = 10;
+    this.isGameWin = false;
+    this.isGameLost = false;
+    this.FieldsLeft = config.cols * config.rows - config.mines;
+    this.cellsArr = [];
+    this.board = this.getBoard();
+    this.stats = new Stats();
+  }
+  setGrid() {
+    this.board.style.gridTemplateColumns = `repeat(${this.cols},1.61rem)`;
+    this.board.style.gridTemplateRows = `repeat(${this.rows},1.61rem)`;
+  }
+  GenerateBoard() {
+    for (let i = 0; i < this.cols; i++) {
+      this.cellsArr[i] = [];
+      for (let j = 0; j < this.rows; j++) {
+        this.cellsArr[i].push(new Field(i, j));
+        const div = this.cellsArr[i][j].createField();
+        this.board.insertAdjacentHTML("beforeend", div);
+        this.cellsArr[i][j].setDOMelement();
       }
     }
-    board.style.gridTemplateColumns = `repeat(${cols},1.61rem)`;
-    board.style.gridTemplateRows = `repeat(${rows},1.61rem)`;
+    this.setGrid();
   }
-  PlaceMines(config) {
-    let mines = config.mines;
-    const flatArr = this.#cellsArr.flat();
+  PlaceMines(mines) {
+    let mine = mines;
+    const flatArr = this.cellsArr.flat();
 
     while (mines) {
-      const cel = Math.floor(Math.random() * this.#NumberOfCells);
+      const cel = Math.floor(Math.random() * this.NumberOfCells);
       flatArr[cel].isMine = true;
       mines--;
     }
@@ -47,11 +51,11 @@ class Game extends UI {
           (i == x && y == j) ||
           i < 0 ||
           j < 0 ||
-          i >= this.#cols ||
-          j >= this.#rows
+          i >= this.cols ||
+          j >= this.rows
         )
           continue;
-        if (this.#cellsArr[i][j].isMine) {
+        if (this.cellsArr[i][j].isMine) {
           value++;
         }
       }
@@ -60,64 +64,92 @@ class Game extends UI {
     return value;
   }
 
-  RenderValueForBoard() {
-    for (const firstLevel of this.#cellsArr) {
+  assignValueToFields() {
+    for (const firstLevel of this.cellsArr) {
       for (const secondLevel of firstLevel) {
-        this.#cellsArr[secondLevel.x][secondLevel.y].value =
+        this.cellsArr[secondLevel.x][secondLevel.y].value =
           this.CalcValueForSingleField(secondLevel.x, secondLevel.y);
       }
     }
   }
+  showEmptyFields(x, y) {
+    x = parseInt(x);
+    y = parseInt(y);
+    for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, this.cols - 1); i++) {
+      for (
+        let j = Math.max(y - 1, 0);
+        j <= Math.min(y + 1, this.rows - 1);
+        j++
+      ) {
+        if (!this.cellsArr[i][j].isClicked) {
+          this.handleClick(this.cellsArr[i][j]);
+        }
+      }
+    }
+  }
 
-  AddEventListenerToFields() {
-    const board = this.getBoard();
+  addEventClick() {
     let moving = false;
     let prevEl = null;
-    board.addEventListener("mousedown", (e) => {
+    this.board.addEventListener("mousedown", (e) => {
+      if (this.isGameLost || this.isGameWin) return;
       moving = true;
-      board.addEventListener("mousemove", (s) => {
+      this.stats.toggleAstFace();
+      this.stats.toggleSmileFace();
+      this.board.addEventListener("mousemove", (s) => {
         if (prevEl) prevEl.classList.remove("hover");
         if (!moving) return;
         prevEl = document.elementFromPoint(s.clientX, s.clientY);
         prevEl.classList.add("hover");
       });
-      board.addEventListener(
+      document.addEventListener(
         "mouseup",
         (x) => {
+          this.stats.toggleSmileFace();
+          this.stats.toggleAstFace();
           moving = false;
-          if (typeof x.target.dataset.x == "undefined") return;
-          const cell = this.#cellsArr[x.target.dataset.x][x.target.dataset.y];
-          cell.isClicked = true;
-          cell.showField();
-          this.showEmptyFields(x.target.dataset.x, x.target.dataset.y);
+          if (typeof e.target.dataset.x == "undefined") return;
+          const field = this.cellsArr[e.target.dataset.x][e.target.dataset.y];
+          this.handleClick(field);
         },
         { once: true }
       );
     });
   }
-  showEmptyFields(x, y) {
-    x = parseInt(x);
-    y = parseInt(y);
-    if (!this.#cellsArr[x][y].value) {
-      for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, this.#cols); i++) {
-        for (
-          let j = Math.max(y - 1, 0);
-          j <= Math.min(y + 1, this.#rows);
-          j++
-        ) {
-          if (!this.#cellsArr[i][j].isClicked) {
-            this.#cellsArr[i][j].showField();
-          }
-        }
-      }
+  endGame(bool) {
+    if (bool) {
+      this.isGameWin = true;
+      this.showFieldsWithBomb();
+    } else {
+      this.isGameLost = true;
+      console.log("end");
+      this.stats.toggleSmileFace();
+      this.stats.toggleSadFace();
     }
   }
+
+  handleClick(field) {
+    if (field.isMine) {
+      field.showBomb();
+      this.endGame();
+      return;
+    }
+    if (field.isFlagged) return;
+    if (field.isQusetionMark) return;
+    if (field.value) {
+      field.showValue();
+    }
+    field.isClicked = true;
+    field.showEmpty();
+    if (!field.value) this.showEmptyFields(field.x, field.y);
+  }
+
   initGame() {
-    this.GenerateBoard(Config.easy);
-    this.PlaceMines(Config.easy);
-    this.RenderValueForBoard();
-    this.AddEventListenerToFields();
+    this.GenerateBoard();
+    this.PlaceMines(this.bombs);
+    this.assignValueToFields();
+    this.addEventClick();
   }
 }
-const saper = new Game();
+const saper = new Game(Config.easy);
 saper.initGame();

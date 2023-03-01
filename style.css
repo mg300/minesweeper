@@ -1,6 +1,12 @@
 * {
   margin: 0;
   padding: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 html {
   font-size: 16px;
@@ -135,7 +141,15 @@ html {
   border-radius: 0.1rem;
   border: 6px outset #dbdbdb;
 }
-
+.face.sad img {
+  content: url("/icons/sad.png");
+}
+.face.smile img {
+  content: url("/icons/happiness.png");
+}
+.face.ast img {
+  content: url("/icons/astonished.png");
+}
 .face img {
   width: 40px;
   height: 40px;
