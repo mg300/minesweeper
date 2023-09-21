@@ -9,31 +9,35 @@ class Game extends UI {
     this.initGame();
   }
   startNewGame(config) {
+    if (this.stats) this.stats.resetTimer();
     this.config = config;
     this.cols = config.cols;
     this.board = this.getBoard();
     this.board.innerHTML = "";
     this.rows = config.rows;
     this.bombs = config.mines;
+    this.bombsLeft = config.mines;
     this.NumberOfCells = config.cols * config.rows;
-    this.cellsLeft = 10;
     this.isGameWin = false;
     this.isGameLost = false;
     this.FieldsLeft = config.cols * config.rows - config.mines;
     this.cellsArr = [];
+    this.levels = this.getLevels();
     this.stats = new Stats();
     this.GenerateBoard();
     this.PlaceMines(this.bombs);
     this.assignValueToFields();
+    this.stats.setBombsLeft(this.bombsLeft);
+    this.addEventTimer();
   }
   setGrid() {
     this.board.style.gridTemplateColumns = `repeat(${this.cols},1.61rem)`;
     this.board.style.gridTemplateRows = `repeat(${this.rows},1.61rem)`;
   }
   GenerateBoard() {
-    for (let i = 0; i < this.cols; i++) {
+    for (let i = 0; i < this.rows; i++) {
       this.cellsArr[i] = [];
-      for (let j = 0; j < this.rows; j++) {
+      for (let j = 0; j < this.cols; j++) {
         this.cellsArr[i].push(new Field(i, j));
         const div = this.cellsArr[i][j].createField();
         this.board.insertAdjacentHTML("beforeend", div);
@@ -49,7 +53,6 @@ class Game extends UI {
     while (mines) {
       const cel = Math.floor(Math.random() * this.NumberOfCells);
       if (!flatArr[cel].isMine) mines--;
-      console.log("xdd");
       flatArr[cel].isMine = true;
     }
   }
@@ -61,8 +64,8 @@ class Game extends UI {
           (i == x && y == j) ||
           i < 0 ||
           j < 0 ||
-          i >= this.cols ||
-          j >= this.rows
+          i >= this.rows ||
+          j >= this.cols
         )
           continue;
         if (this.cellsArr[i][j].isMine) {
@@ -85,10 +88,10 @@ class Game extends UI {
   showEmptyFields(x, y) {
     x = parseInt(x);
     y = parseInt(y);
-    for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, this.cols - 1); i++) {
+    for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, this.rows - 1); i++) {
       for (
         let j = Math.max(y - 1, 0);
-        j <= Math.min(y + 1, this.rows - 1);
+        j <= Math.min(y + 1, this.cols - 1);
         j++
       ) {
         if (!this.cellsArr[i][j].isClicked) {
@@ -102,7 +105,8 @@ class Game extends UI {
     let moving = false;
     let prevEl = null;
     this.board.addEventListener("mousedown", (e) => {
-      if (this.isGameLost || this.isGameWin) return;
+      if (this.isGameLost || this.isGameWin || e.button == 2 || e.button == 1)
+        return;
       moving = true;
       this.stats.toggleAstFace();
       this.stats.toggleSmileFace();
@@ -127,41 +131,116 @@ class Game extends UI {
     });
   }
   endGame(bool) {
+    this.stats.stopTimer();
     if (bool) {
       this.isGameWin = true;
-      this.showFieldsWithBomb();
+      Field.showAllBombs(this.cellsArr);
     } else {
       this.isGameLost = true;
+      this.stats.setBombsLeft(0);
+      Field.showAllBombs(this.cellsArr);
       this.stats.toggleSmileFace();
       this.stats.toggleSadFace();
     }
   }
   addEventFace() {
-    this.stats.face.addEventListener(
-      "click",
-      this.startNewGame.bind(this, this.config)
-    );
+    this.stats.face.addEventListener("click", () => {
+      let children = Array.from(this.levels.children);
+      const el = children.find((e) => e.classList.contains("clicked"));
+      console.log(el.dataset.level);
+      if (el.dataset.level == "easy") this.startNewGame(Config.easy);
+      if (el.dataset.level == "normal") this.startNewGame(Config.normal);
+      if (el.dataset.level == "expert") this.startNewGame(Config.expert);
+    });
   }
-
+  checkFlaggedFields() {
+    let fieldCheck = 0;
+    this.cellsArr.flat().forEach((e) => {
+      fieldCheck = e.isFlagged && e.isMine ? fieldCheck + 1 : fieldCheck;
+    });
+    console.log(fieldCheck);
+    if (fieldCheck == this.bombs) this.endGame(true);
+  }
   handleClick(field) {
     if (field.isMine) {
-      field.showAllBombs(this.cellsArr);
-      this.endGame();
+      this.endGame(false);
       return;
     }
-    if (field.isFlagged) return;
+    if (field.isFlagged) {
+      return;
+    }
     if (field.isQusetionMark) return;
     if (field.value) {
       field.showValue();
     }
     field.isClicked = true;
+
     field.showEmpty();
+    this.FieldsLeft--;
+    if (this.FieldsLeft == 0) {
+      this.endGame(true);
+      return;
+    }
     if (!field.value) this.showEmptyFields(field.x, field.y);
+  }
+  addEventTimer() {
+    this.board.addEventListener(
+      "click",
+      this.stats.startTimer.bind(this.stats),
+      { once: true }
+    );
+  }
+  addEventRightClick() {
+    this.board.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      let field = this.cellsArr[e.target.dataset.x][e.target.dataset.y];
+      if (field.isClicked) return;
+      if (field.isQuestionMark) {
+        console.log("x");
+        field.toggleQuestionMark();
+        return;
+      }
+      if (field.isFlagged) {
+        this.bombsLeft++;
+        field.toggleQuestionMark();
+        field.toggleFlag();
+      } else if (!field.isFlagged) {
+        field.toggleFlag();
+        this.bombsLeft--;
+        if (this.bombsLeft == 0) {
+          this.checkFlaggedFields();
+        }
+      }
+      field.isFlagged = !field.isFlagged;
+      this.cellsArr[e.target.dataset.x][e.target.dataset.y].isFlagged =
+        !field.isFlagged;
+      this.stats.setBombsLeft(this.bombsLeft);
+    });
+  }
+  addEventLevels() {
+    this.levels.addEventListener("click", (e) => {
+      this.levels.childNodes.forEach((e) => {
+        if (typeof e.classList != "undefined") e.classList.remove("clicked");
+      });
+      const el = e.target.classList;
+      if (el.contains("easy")) {
+        this.startNewGame(Config.easy);
+        el.add("clicked");
+      } else if (el.contains("medium")) {
+        this.startNewGame(Config.normal);
+        el.add("clicked");
+      } else if (el.contains("hard")) {
+        this.startNewGame(Config.expert);
+        el.add("clicked");
+      }
+    });
   }
 
   initGame() {
     this.addEventClickField();
     this.addEventFace();
+    this.addEventRightClick();
+    this.addEventLevels();
   }
 }
-const saper = new Game(Config.expert);
+const saper = new Game(Config.easy);

@@ -29,12 +29,14 @@ export class Field extends UI {
   toggleQuestionMark() {
     if (!this.isQuestionMark) {
       this.DOMelement.textContent = "?";
+      this.isQuestionMark = true;
     } else {
       this.DOMelement.textContent = "";
+      this.isQuestionMark = false;
     }
   }
 
-  showAllBombs(arr) {
+  static showAllBombs(arr) {
     arr.flat().forEach((arr) => {
       if (arr.isMine) {
         arr.DOMelement.classList.remove("not-clicked");

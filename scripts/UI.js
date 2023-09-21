@@ -4,6 +4,7 @@ export class UI {
   static face = ".face";
   static timer = ".time";
   static bombsLeft = ".bombs-left";
+  static levels = ".levels";
 
   getCell(sel) {
     return document.querySelector(sel);
@@ -15,12 +16,15 @@ export class UI {
     return document.querySelector(UI.board);
   }
   getTimer() {
-    return document.querySelector(UI.timer);
+    return document.querySelector(UI.timer).firstChild;
   }
   getBombsLeft() {
-    return document.querySelector(UI.bombLeft);
+    return document.querySelector(UI.bombsLeft).firstChild;
   }
   getFace() {
     return document.querySelector(UI.face);
+  }
+  getLevels() {
+    return document.querySelector(UI.levels);
   }
 }

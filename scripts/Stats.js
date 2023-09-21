@@ -7,8 +7,29 @@ export class Stats extends UI {
     this.timer = this.getTimer();
     this.resetFace();
   }
-  startTimer() {}
-  stopTimer() {}
+  #interval = null;
+  #seconds = 0;
+
+  #updateTimer() {
+    this.timer.textContent = this.#seconds;
+    this.#seconds++;
+    if (this.#seconds > 999) this.stopTimer();
+  }
+  startTimer() {
+    console.log("timer started");
+    this.#interval = setInterval(() => {
+      this.#updateTimer();
+    }, 1000);
+  }
+  stopTimer() {
+    console.log("timer stopped");
+    clearInterval(this.#interval);
+  }
+  resetTimer() {
+    this.stopTimer();
+    this.#seconds = 0;
+    this.#updateTimer();
+  }
   toggleSmileFace() {
     this.face.classList.toggle("smile");
   }
@@ -22,6 +43,6 @@ export class Stats extends UI {
     this.face.className = "state-field field face not-clicked smile";
   }
   setBombsLeft(quantity) {
-    this.bombs.innerHTML = this.quantity;
+    this.bombs.textContent = quantity;
   }
 }

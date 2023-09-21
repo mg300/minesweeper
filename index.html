@@ -8,24 +8,34 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="saper">
-      <div class="state">
-        <div class="state-field bombs-left"><p>125</p></div>
-        <div class="state-field field face not-clicked">
-          <img class="bomb-img"  />
+    <div class="game">
+      <div class="saper">
+        <div class="state">
+          <div class="state-field bombs-left"><p>0</p></div>
+          <div class="state-field field face not-clicked">
+            <img class="bomb-img" />
+          </div>
+          <div class="state-field time"><p>0</p></div>
         </div>
-        <div class="state-field time"><p>123</p></div>
-      </div>
-      <div class="board">
-        <!-- <div class="field not-clicked"></div>
-        <div class="field clicked"></div>
-        <div class="field clicked number number-2">2</div>
-        <div class="field flag not-clicked"></div>
-        <div class="field clicked number">?</div>
+        <div class="board">
+          <!-- <div class="field not-clicked"></div>
+            <div class="field clicked"></div>
+            <div class="field clicked number number-2">2</div>
+            <div class="field flag not-clicked"></div>
+            <div class="field clicked number">?</div>
         <div class="field clicked bomb-field"></div>
         <div class="field bomb-detonated"></div>
       </div> -->
+        </div>
+        <div class="levels">
+          <div class="easy clicked" data-level="easy">EASY</div>
+          <div class="medium" data-level="normal">MEDIUM</div>
+          <div class="hard" data-level="expert">HARD</div>
+        </div>
+      </div>
+      <p class="author">Created by Mateusz G</p>
     </div>
+
     <script type="module" src="scripts/game.js"></script>
   </body>
 </html>

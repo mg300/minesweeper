@@ -11,12 +11,14 @@
 html {
   font-size: 16px;
 }
-
+.game {
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+}
 .saper {
   width: fit-content;
   padding: 1rem;
-  margin-left: auto;
-  margin-right: auto;
   border: 0.25rem outset #dbdbdb;
   background-color: #b6b6b6;
 }
@@ -160,4 +162,39 @@ html {
   text-align: center;
   line-height: 45px;
   letter-spacing: 10px;
+}
+.levels {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 900;
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+.levels > * {
+  color: #4a4a4a;
+  background-color: #b5b5b5;
+  border-radius: 0.1rem;
+  border: 6px outset #dbdbdb;
+  padding: 0.6rem;
+  cursor: pointer;
+}
+
+.levels > .clicked,
+.levels > *:hover {
+  border: 6px inset #dbdbdb;
+  background-color: #dbdbdb;
+  border-radius: 0.1rem;
+}
+.game {
+  display: flex;
+  flex-direction: column;
+}
+.author {
+  padding: 0.2rem;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: #353f41;
+  letter-spacing: -0.02rem;
 }
